@@ -62,3 +62,5 @@ vcs.xml
 deployment.xml
 inspectionProfiles/Project_Default.xml
 
+# EXPO settings
+.expo/
