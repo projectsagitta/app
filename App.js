@@ -8,12 +8,6 @@ import Root from './src/Root';
 
 const store = configureStore();
 
-// const App = () => (
-//     <Provider store={store}>
-//         <Root />
-//     </Provider>
-// )
-
 export default class App extends React.Component {
     render() {
         return (
@@ -23,3 +17,5 @@ export default class App extends React.Component {
         );
     }
 }
+
+
