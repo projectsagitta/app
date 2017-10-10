@@ -13,7 +13,7 @@ export default class Drawer extends Component {
         return (
             <View style={styles.container}>
                 <Text style={styles.header}>
-                    Drawer
+                    Menu
                 </Text>
                 <View style={styles.button}> 
                     <Button
