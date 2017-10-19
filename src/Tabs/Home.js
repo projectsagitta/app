@@ -13,9 +13,7 @@ class Home extends Component {
         
         return (
             <View style={styles.container}>
-                <HeaderButton
-                    onPress={() => navigate('DrawerOpen')} 
-                />               
+                             
 
                 {/*<Button*/}
                     {/*onPress={() => this.props.fetchData()}*/}
@@ -39,6 +37,17 @@ class Home extends Component {
                 {/*</View>*/}
                 
                 <Geolocation />
+                
+                <HeaderButton
+                    onPress={() => navigate('DrawerOpen')}
+                />
+                <View style={styles.buttonBottom}>
+                    <Button 
+                        title="Go!"
+                        onPress={() => navigate('Modal')}
+                    />
+                </View>
+                
             </View>
         )
     }
@@ -56,6 +65,12 @@ const styles = StyleSheet.create({
     },
     mainContentText: {
         alignItems: 'center'
+    },
+    buttonBottom: {
+        position: 'absolute',
+        bottom: 10,
+        left: 10,
+        right: 10
     }
 });
 
