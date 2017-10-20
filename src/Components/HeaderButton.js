@@ -22,10 +22,11 @@ export default class HeaderButton extends Component {
             <View style={styles.container}>
                 <Icon.Button
                     name={this.props.icon}
-                    size={26}
+                    size={30}
                     color="#4F8EF7"
                     backgroundColor="#FFF"
                     onPress={this.props.onPress}
+                    style={styles.icon}
                 />                            
             </View>            
         );        
@@ -34,8 +35,14 @@ export default class HeaderButton extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        ...StyleSheet.absoluteFillObject,
-        top: 20,
-        left: 5,
+        position: 'absolute',
+        top: 10,
+        left: 10
     },
+    icon: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingRight: 0,
+        paddingLeft: 10
+    }
 });
