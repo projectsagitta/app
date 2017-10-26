@@ -6,6 +6,7 @@ import {
     View
 } from 'react-native';
 import HeaderButton from '../Components/HeaderButton';
+import BluetoothConnection from '../Components/BluetoothConnection';
 
 export default class DeviceSearch extends Component {
     
@@ -14,15 +15,20 @@ export default class DeviceSearch extends Component {
         return(
             <View style={styles.container}>
                 <HeaderButton onPress={() => navigate('DrawerOpen')} />
+                
                 <Text style={styles.header}>
                     Device Search
                 </Text>
+                
+                <BluetoothConnection />
+                
                 <View style={styles.button}> 
                     <Button
                         onPress={() => navigate('Profile', { user: 'User' })}
                         title="Open Profile"
                     />    
                 </View>                
+                
                 <Button
                     onPress={() => navigate('Modal')}
                     title="Open Modal"
