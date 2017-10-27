@@ -14,9 +14,11 @@ export default class DeviceSearch extends Component {
         return(
             <View style={styles.container}>
                 <HeaderButton onPress={() => navigate('DrawerOpen')} />
-                <Text style={styles.header}>
-                    Device Search
-                </Text>
+                <View style={{alignContent: 'center', alignItems: 'center'}}>
+                    <Text style={styles.header}>
+                        Device Search
+                    </Text>
+                </View>                
                 <BluetoothConnection /> 
             </View>
         );        
@@ -27,12 +29,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FFF',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     header: {
         fontSize: 20,
         marginVertical: 20,
-        color: '#000'
+        color: '#000',
+        textAlign: 'center'
     }
 });

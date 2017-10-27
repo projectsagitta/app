@@ -4,8 +4,10 @@ import {
     View,
     Text,
     StyleSheet,
+    Button,
     TouchableOpacity,
-    TouchableHighlight
+    TouchableHighlight,
+    ActivityIndicator
 } from 'react-native';
 
 import BluetoothSerial from 'react-native-bluetooth-serial';
@@ -24,6 +26,7 @@ export default class BluetoothConnection extends Component {
         };
         this.enableBluetooth = this.enableBluetooth.bind(this);
         this.startDiscovery = this.startDiscovery.bind(this);
+        this.cancelDiscovery = this.cancelDiscovery.bind(this);
     }
     
     componentDidMount() {
@@ -47,8 +50,7 @@ export default class BluetoothConnection extends Component {
     /**
      * [android]
      * Discover unpaired devices, works only in android
-     */    
-    
+     */        
     startDiscovery() {
         this.enableBluetooth()
             .then((res) => {
@@ -82,18 +84,34 @@ export default class BluetoothConnection extends Component {
     
     render() {
         return (
-            <View>
-                <TouchableHighlight style={{marginTop: 40,margin: 20, padding:20, backgroundColor:'#ccc'}} onPress={this.startDiscovery}>
-                    <Text>Discover devices ({ this.state.discovering ? 'on' : 'off' })</Text>
-                </TouchableHighlight>
+            <View style={{flex: 1}}>
+                <View style={{ position: 'absolute', bottom: 10, left: 10, right: 10}} >
+                    <Button
+                        title={'Discover devices'}
+                        onPress={this.startDiscovery} />
+                </View>                
+                {
+                    this.state.discovering 
+                    ? ( <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                            <ActivityIndicator
+                                style={{ marginBottom: 15 }}
+                                size={60} />
+                            <Button                                
+                                title='Cancel Discovery'
+                                onPress={this.cancelDiscovery} />
+                        </View> ) : null                            
+                }
+                
                 <View>
                     {
                         this.state.unpairedDevices.length ? (
                             this.state.unpairedDevices.map((device, i) => {
                                 return (
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }}>
-                                        <Text style={{ fontWeight: 'bold' }}>{device.name}</Text>
-                                        <Text>{`<${device.id}>`}</Text>
+                                    <View
+                                        key={`id_${i}`}
+                                        style={{ justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginVertical: 16 }}>
+                                        <Text style={{ fontWeight: 'bold', color: '#000' }}>{device.name}</Text>
+                                        <Text style={{color:'#000'}}>{`<${device.id}>`}</Text>
                                     </View>
                                 )
                             }) 
