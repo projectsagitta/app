@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import {
-    Button,
+import {    
     StyleSheet,
     Text,
     View
@@ -15,29 +14,13 @@ export default class DeviceSearch extends Component {
         return(
             <View style={styles.container}>
                 <HeaderButton onPress={() => navigate('DrawerOpen')} />
-                
                 <Text style={styles.header}>
                     Device Search
                 </Text>
-                
-                <BluetoothConnection />
-                
-                <View style={styles.button}> 
-                    <Button
-                        onPress={() => navigate('Profile', { user: 'User' })}
-                        title="Open Profile"
-                    />    
-                </View>                
-                
-                <Button
-                    onPress={() => navigate('Modal')}
-                    title="Open Modal"
-                />
+                <BluetoothConnection /> 
             </View>
-        );
-        
-    }
-    
+        );        
+    }    
 }
 
 const styles = StyleSheet.create({
@@ -51,8 +34,5 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginVertical: 20,
         color: '#000'
-    },
-    button: {
-        marginBottom: 20
     }
 });

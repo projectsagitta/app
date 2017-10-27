@@ -20,21 +20,21 @@ class Home extends Component {
                     {/*title="Load Data"*/}
                 {/*/>*/}
                 
-                <View style={styles.mainContent}>
-                    {
-                        this.props.appData.isFetching && <Text>Loading</Text>
-                    }
-                    {
-                        this.props.appData.data.length ? (
-                            this.props.appData.data.map((person, i) => {
-                                return <View key={i} style={styles.mainContentText}>
-                                    <Text>Name: {person.name}</Text>
-                                    <Text>Age: {person.age}</Text>
-                                </View>
-                            })
-                        ) : null
-                    }
-                </View>
+                {/*<View style={styles.mainContent}>*/}
+                    {/*{*/}
+                        {/*this.props.appData.isFetching && <Text>Loading</Text>*/}
+                    {/*}*/}
+                    {/*{*/}
+                        {/*this.props.appData.data.length ? (*/}
+                            {/*this.props.appData.data.map((person, i) => {*/}
+                                {/*return <View key={i} style={styles.mainContentText}>*/}
+                                    {/*<Text>Name: {person.name}</Text>*/}
+                                    {/*<Text>Age: {person.age}</Text>*/}
+                                {/*</View>*/}
+                            {/*})*/}
+                        {/*) : null*/}
+                    {/*}*/}
+                {/*</View>*/}
                 
                 <Geolocation />
                 
