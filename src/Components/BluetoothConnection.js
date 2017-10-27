@@ -5,10 +5,11 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    TouchableHighlight,
+    TouchableHighlight
 } from 'react-native';
 
 import BluetoothSerial from 'react-native-bluetooth-serial';
+import Toast from '@remobile/react-native-toast';
 
 export default class BluetoothConnection extends Component {
     
@@ -21,14 +22,13 @@ export default class BluetoothConnection extends Component {
             unpairedDevices: [],
             connected: false
         };
-        this.discoverUnpairedDevices = this.discoverUnpairedDevices.bind(this);
         this.enableBluetooth = this.enableBluetooth.bind(this);
-        this.startDiscovering = this.startDiscovering.bind(this);
+        this.startDiscovery = this.startDiscovery.bind(this);
     }
     
     componentDidMount() {
-        BluetoothSerial.on('bluetoothEnabled', () => console.log('Bluetooth enabled'));
-        BluetoothSerial.on('bluetoothDisabled', () => console.log('Bluetooth disabled'));
+        BluetoothSerial.on('bluetoothEnabled', () => Toast.showShortBottom('Bluetooth enabled'));
+        BluetoothSerial.on('bluetoothDisabled', () => Toast.showShortBottom('Bluetooth disabled'));
         BluetoothSerial.on('error', (err) => console.log(`Error: ${err.message}`));
     }
 
@@ -40,20 +40,16 @@ export default class BluetoothConnection extends Component {
         return BluetoothSerial.enable()
             .then((res) => {
                 this.setState({ isEnabled: true });
-                console.log('Bluetooth enabled');
             })
-            .catch((err) => console.log(err.message))
+            .catch((err) => Toast.showShortBottom(err.message))
     }
     
     /**
      * [android]
      * Discover unpaired devices, works only in android
-     */
-    discoverUnpairedDevices() {
-        
-    }
+     */    
     
-    startDiscovering() {
+    startDiscovery() {
         this.enableBluetooth()
             .then((res) => {
                 if (this.state.discovering) {
@@ -69,11 +65,25 @@ export default class BluetoothConnection extends Component {
                 }    
             })
     }
+
+    /**
+     * [android]
+     * Discover unpaired devices, works only in android
+     */
+    cancelDiscovery () {
+        if (this.state.discovering) {
+            BluetoothSerial.cancelDiscovery()
+                .then(() => {
+                    this.setState({ discovering: false })
+                })
+                .catch((err) => Toast.showShortBottom(err.message))
+        }
+    }
     
     render() {
         return (
             <View>
-                <TouchableHighlight style={{marginTop: 40,margin: 20, padding:20, backgroundColor:'#ccc'}} onPress={this.startDiscovering}>
+                <TouchableHighlight style={{marginTop: 40,margin: 20, padding:20, backgroundColor:'#ccc'}} onPress={this.startDiscovery}>
                     <Text>Discover devices ({ this.state.discovering ? 'on' : 'off' })</Text>
                 </TouchableHighlight>
                 <View>

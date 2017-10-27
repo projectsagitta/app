@@ -8,6 +8,7 @@
 		"bundle": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/"
 	},
 	"dependencies": {
+		"@remobile/react-native-toast": "^1.0.7",
 		"prop-types": "^15.6.0",
 		"react": "16.0.0-beta.5",
 		"react-native": "0.49.3",
