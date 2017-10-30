@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import HeaderButton from '../Components/HeaderButton';
 import BluetoothConnection from '../Components/BluetoothConnection';
+import DeviceSearchModal from '../Components/DeviceSearchModal';
 
 export default class DeviceSearch extends Component {
     
@@ -20,6 +21,7 @@ export default class DeviceSearch extends Component {
                     </Text>
                 </View>                
                 <BluetoothConnection /> 
+                <DeviceSearchModal />
             </View>
         );        
     }    

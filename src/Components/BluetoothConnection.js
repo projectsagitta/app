@@ -7,7 +7,8 @@ import {
     Button,
     TouchableOpacity,
     TouchableHighlight,
-    ActivityIndicator
+    ActivityIndicator,
+    Platform
 } from 'react-native';
 
 import BluetoothSerial from 'react-native-bluetooth-serial';
@@ -32,7 +33,7 @@ export default class BluetoothConnection extends Component {
     componentDidMount() {
         BluetoothSerial.on('bluetoothEnabled', () => Toast.showShortBottom('Bluetooth enabled'));
         BluetoothSerial.on('bluetoothDisabled', () => Toast.showShortBottom('Bluetooth disabled'));
-        BluetoothSerial.on('error', (err) => console.log(`Error: ${err.message}`));
+        BluetoothSerial.on('error', (err) => console.log(`Error: ${err.message}`));        
     }
 
     /**
@@ -84,17 +85,17 @@ export default class BluetoothConnection extends Component {
     
     render() {
         return (
-            <View style={{flex: 1}}>
-                <View style={{ position: 'absolute', bottom: 10, left: 10, right: 10}} >
+            <View style={styles.container}>
+                <View style={styles.buttonBottom} >
                     <Button
-                        title={'Discover devices'}
+                        title={'Discover'}
                         onPress={this.startDiscovery} />
                 </View>                
                 {
                     this.state.discovering 
-                    ? ( <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    ? ( <View style={styles.activityContainer}>
                             <ActivityIndicator
-                                style={{ marginBottom: 15 }}
+                                style={styles.activityIcon}
                                 size={60} />
                             <Button                                
                                 title='Cancel Discovery'
@@ -109,9 +110,9 @@ export default class BluetoothConnection extends Component {
                                 return (
                                     <View
                                         key={`id_${i}`}
-                                        style={{ justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginVertical: 16 }}>
-                                        <Text style={{ fontWeight: 'bold', color: '#000' }}>{device.name}</Text>
-                                        <Text style={{color:'#000'}}>{`<${device.id}>`}</Text>
+                                        style={styles.devicesListItem}>
+                                        <Text style={styles.devicesName}>{device.name}</Text>
+                                        <Text style={styles.devicesId}>{`<${device.id}>`}</Text>
                                     </View>
                                 )
                             }) 
@@ -124,3 +125,37 @@ export default class BluetoothConnection extends Component {
         
     }
 }
+
+const styles = StyleSheet.create({
+   container: {
+       flex: 1 
+   },
+   buttonBottom: {
+       position: 'absolute', 
+       bottom: 10, 
+       left: 10, 
+       right: 10
+   },
+   activityContainer: {
+       flex: 1, 
+       alignItems: 'center', 
+       justifyContent: 'center'
+   },
+   activityIcon: {
+       marginBottom: 15
+   },
+   devicesListItem: {
+       justifyContent: 'space-between', 
+       flexDirection: 'row', 
+       alignItems: 'center', 
+       paddingHorizontal: 15, 
+       marginVertical: 15
+   },
+   devicesName: {
+       fontWeight: 'bold', 
+       color: '#000'
+   },
+   devicesId: {
+       color:'#000'
+   } 
+});
