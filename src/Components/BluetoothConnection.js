@@ -5,10 +5,7 @@ import {
     Text,
     StyleSheet,
     Button,
-    TouchableOpacity,
-    TouchableHighlight,
-    ActivityIndicator,
-    Platform
+    ActivityIndicator
 } from 'react-native';
 
 import BluetoothSerial from 'react-native-bluetooth-serial';
@@ -23,6 +20,7 @@ export default class BluetoothConnection extends Component {
             discovering: false,
             devices: [],
             unpairedDevices: [],
+            connecting: false,
             connected: false
         };
         this.enableBluetooth = this.enableBluetooth.bind(this);
@@ -82,6 +80,39 @@ export default class BluetoothConnection extends Component {
                 .catch((err) => Toast.showShortBottom(err.message))
         }
     }
+
+    /**
+     * [android]
+     * Pair device
+     */
+    pairDevice(device) {
+        BluetoothSerial.pairDevice(device.id)
+            .then((paired) => {
+                if (paired) {
+                    Toast.showShortBottom(`Device ${device.name} paired successfully`);
+                    const devices = this.state.devices;
+                    devices.push(device);
+                    this.setState({ devices, unpairedDevices: this.state.unpairedDevices.filter((d) => d.id !== device.id) });
+                } else {
+                    Toast.showShortBottom(`Device ${device.name} pairing failed`)
+                }
+            })
+            .catch((err) => Toast.showShortBottom(err.message))
+    }
+
+    /**
+     * Connect to bluetooth device by id
+     * @param  {Object} device
+     */
+    connectDevice(device) {
+        this.setState({ connecting: true });
+        BluetoothSerial.connect(device.id)
+            .then((res) => {
+                Toast.showShortBottom(`Connected to device ${device.name}`);
+                this.setState({ device, connected: true, connecting: false });
+            })
+            .catch((err) => Toast.showShortBottom(err.message))
+    }
     
     render() {
         return (
@@ -102,7 +133,14 @@ export default class BluetoothConnection extends Component {
                                 onPress={this.cancelDiscovery} />
                         </View> ) : null                            
                 }
-                
+                <View>
+                    { !(this.state.unpairedDevices.length || this.state.devices.length) ? (                            
+                            <View style={styles.devicesMsg}>
+                                <Text style={styles.devicesListEmpty}>No devices found yet.</Text>
+                                <Text style={styles.devicesListEmpty}>Press "discover" to start searching.</Text>
+                            </View>                                
+                        ) : null }
+                </View>
                 <View>
                     {
                         this.state.unpairedDevices.length ? (
@@ -111,8 +149,13 @@ export default class BluetoothConnection extends Component {
                                     <View
                                         key={`id_${i}`}
                                         style={styles.devicesListItem}>
-                                        <Text style={styles.devicesName}>{device.name}</Text>
-                                        <Text style={styles.devicesId}>{`<${device.id}>`}</Text>
+                                        <View>
+                                            <Text style={styles.devicesName}>{device.name}</Text>
+                                            <Text style={styles.devicesId}>{`<${device.id}>`}</Text>
+                                        </View>                                        
+                                        <Button
+                                            title='Pair'
+                                            onPress={this.pairDevice.bind(this, device)} />
                                     </View>
                                 )
                             }) 
@@ -120,6 +163,29 @@ export default class BluetoothConnection extends Component {
                     }
                     
                 </View>
+                <View style={{marginTop: 20}}>
+                    {
+                        this.state.devices.length ? (
+                            this.state.devices.map((device, i) => {
+                                return (
+                                    <View
+                                        key={`id_${i}`}
+                                        style={styles.devicesListItem}>
+                                        <View>
+                                            <Text style={styles.devicesName}>{device.name}</Text>
+                                            <Text style={styles.devicesId}>{`<${device.id}>`}</Text>
+                                        </View>                                        
+                                        <Button
+                                            title='Connect'
+                                            onPress={this.connectDevice.bind(this, device)} />
+                                    </View>
+                                )
+                            }) 
+                        ) : null
+                    }
+                    
+                </View>
+                
             </View>
         )
         
@@ -139,7 +205,9 @@ const styles = StyleSheet.create({
    activityContainer: {
        flex: 1, 
        alignItems: 'center', 
-       justifyContent: 'center'
+       justifyContent: 'center',
+       ...StyleSheet.absoluteFillObject
+       
    },
    activityIcon: {
        marginBottom: 15
@@ -157,5 +225,14 @@ const styles = StyleSheet.create({
    },
    devicesId: {
        color:'#000'
+   },
+   devicesListEmpty: {
+       textAlign: 'center', 
+       color: '#000', 
+       fontSize: 16
+   },
+   devicesMsg: {
+       padding: 20
    } 
+   
 });

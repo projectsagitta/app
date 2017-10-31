@@ -5,7 +5,8 @@ import {
     Modal,
     View,
     Text,
-    Button
+    Button,
+    StyleSheet
 } from "react-native";
 
 export default class DeviceSearchModal extends Component {
@@ -37,16 +38,13 @@ export default class DeviceSearchModal extends Component {
                     transparent={true}
                     visible={this.state.modalVisible}
                     onRequestClose={() => {alert("Modal has been closed.")}}
-                    style={{flex: 1,  backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center'}}
+                    style={styles.modalContainer}
                 >
-                    <View style={{flex: 1,  backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', padding: 16}}>
-                        <Text style={{color: '#000', fontSize: 16}}>
+                    <View style={styles.container}>
+                        <Text style={styles.textContainer}>
                             Now is the right time to turn on the TCD-device! You can then start discovering the device by pressing the button "discover". 
                         </Text>
-                        <View style={{ position: 'absolute',
-                            bottom: 10,
-                            left: 10,
-                            right: 10}}>
+                        <View style={styles.buttonBottom}>
                             <Button
                                 title={'Got it!'}
                                 onPress={() => {
@@ -60,3 +58,30 @@ export default class DeviceSearchModal extends Component {
         )
     }
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,  
+        backgroundColor: '#fff', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        padding: 16
+    },
+    modalContainer: {
+        flex: 1,  
+        backgroundColor: '#fff', 
+        alignItems: 'center', 
+        justifyContent: 'center'  
+    },
+    textContainer: {
+        color: '#000', 
+        fontSize: 16, 
+        textAlign: 'center'
+    },
+    buttonBottom: {
+       position: 'absolute',
+       bottom: 10,
+       left: 10,
+       right: 10 
+   } 
+});

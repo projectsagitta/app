@@ -21,8 +21,7 @@ const AppNavigation = StackNavigator({
     DeviceSearch: {
         screen: DeviceSearch,
         navigationOptions: {
-            header: null,
-            headerBackTitle: 'Back',
+            title: 'Device search'
         },
     },
     Profile: {
