@@ -3,6 +3,8 @@ package com.sagitta;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.remobile.toast.RCTToastPackage;
+import com.rusel.RCTBluetoothSerial.RCTBluetoothSerialPackage;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.facebook.react.ReactNativeHost;
@@ -24,7 +26,9 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
-          new MainReactPackage(),
+            new MainReactPackage(),
+            new RCTToastPackage(),
+            new RCTBluetoothSerialPackage(),
             new MapsPackage(),
             new VectorIconsPackage()
       );
