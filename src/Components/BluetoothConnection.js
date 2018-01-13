@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-
 import {
     ScrollView,
     View,
@@ -8,9 +7,9 @@ import {
     Button,
     ActivityIndicator
 } from 'react-native';
-
 import BluetoothSerial from 'react-native-bluetooth-serial';
 import Toast from '@remobile/react-native-toast';
+import moment from 'moment';
 
 export default class BluetoothConnection extends Component {
     
@@ -27,10 +26,19 @@ export default class BluetoothConnection extends Component {
         };
         this.enableBluetooth = this.enableBluetooth.bind(this);
         this.startDiscovery = this.startDiscovery.bind(this);
+        this.write = this.write.bind(this);
         this.cancelDiscovery = this.cancelDiscovery.bind(this);
     }
     
     componentDidMount() {
+        Promise.all([
+            BluetoothSerial.isEnabled(),
+            BluetoothSerial.list()
+        ]).then((values) => {
+            const [ isEnabled, devices ] = values;
+            this.setState({ isEnabled, devices })
+        });
+        
         BluetoothSerial.on('bluetoothEnabled', () => Toast.showShortBottom('Bluetooth enabled'));
         BluetoothSerial.on('bluetoothDisabled', () => Toast.showShortBottom('Bluetooth disabled'));
         BluetoothSerial.on('error', (err) => console.log(`Error: ${err.message}`));
@@ -40,6 +48,7 @@ export default class BluetoothConnection extends Component {
             }
             this.setState({ connected: false })
         });
+
         BluetoothSerial.withDelimiter('\n').then((res)=>{
             console.log("delimiter setup",res);
             BluetoothSerial.on('read',(data)=>{
@@ -49,9 +58,9 @@ export default class BluetoothConnection extends Component {
                 this.setState({dataFromDevice: dataArray});
             })
         });
-             
     }
-
+    
+    
     /**
      * [android]
      * enable bluetooth on device
@@ -86,7 +95,7 @@ export default class BluetoothConnection extends Component {
 
     /**
      * [android]
-     * Discover unpaired devices, works only in android
+     * Cancel discovery
      */
     cancelDiscovery () {
         if (this.state.discovering) {
@@ -127,9 +136,30 @@ export default class BluetoothConnection extends Component {
             .then((res) => {
                 Toast.showShortBottom(`Connected to device ${device.name}`);
                 this.setState({ device, connected: true, connecting: false });
+
+                let currentDate = moment().format('DDMMYYYYHHmm');
+                console.log(currentDate);
+                const message = `filename ${currentDate}.csv`;
+                this.write(message);
+                
             })
             .catch((err) => Toast.showShortBottom(err.message))
-    }    
+    }
+    /**
+     * Start measuring
+     * @param {String} message
+     */
+    write(message) {        
+        if (!this.state.connected) {
+            Toast.showShortBottom('You must connect to device first')
+        }
+        BluetoothSerial.write(message)
+            .then((res) => {
+                Toast.showShortBottom('Successfully wrote to device');
+                this.setState({ connected: true })
+            })
+            .catch((err) => Toast.showShortBottom(err.message))
+    }
     
     render() {
         return (
@@ -145,7 +175,7 @@ export default class BluetoothConnection extends Component {
                     </View>
                     <View>
                         {
-                            (this.state.unpairedDevices.length && !this.state.devices.length) ? (
+                            (this.state.unpairedDevices.length) ? (
                                 this.state.unpairedDevices.map((device, i) => {
                                     return (
                                         <View
@@ -166,7 +196,7 @@ export default class BluetoothConnection extends Component {
                     </View>
                     <View>
                         {
-                            this.state.devices.length ? (
+                            this.state.devices ? (
                                 this.state.devices.map((device, i) => {
                                     return (
                                         <View
@@ -189,6 +219,16 @@ export default class BluetoothConnection extends Component {
                             ) : null
                         }                    
                     </View>
+                    {/*<View style={{marginRight: 10, marginLeft: 10}}>*/}
+                        {/*{*/}
+                            {/*this.state.connected ? (*/}
+                                {/*<Button*/}
+                                    {/*title='Start'*/}
+                                    {/*onPress={this.write}                                     */}
+                                    {/*/>*/}
+                            {/*) : null*/}
+                        {/*}*/}
+                    {/*</View>*/}
                     <View style={styles.dataList}>
                         {
                             this.state.dataFromDevice.length > 0 && <Text 
