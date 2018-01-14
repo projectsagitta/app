@@ -1,8 +1,10 @@
 import { combineReducers } from 'redux';
-import appData from './dataReducer';
+import CoordReducer from './CoordReducer';
 
-const rootReducer = combineReducers({
-    appData
-});
+const allReducers = {
+    coord: CoordReducer
+}
+
+const rootReducer = combineReducers(allReducers);
 
 export default rootReducer;

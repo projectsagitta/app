@@ -1,16 +1,20 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import * as actions from '../Actions/CoordActions';
+import {store} from '../Store'
+
 import { Button, View, Text, StyleSheet } from 'react-native';
 import MapView from 'react-native-maps';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-export default class Geolocation extends Component {
+class Geolocation extends Component {
     
     constructor(props) {
         super(props);
-
         this.state = {
-            latitude: 0,
-            longitude: 0,
+            latitude: this.props.lat,
+            longitude: this.props.lng,
             error: null,
         };
     }
@@ -23,6 +27,10 @@ export default class Geolocation extends Component {
                     longitude: position.coords.longitude,
                     error: null,
                 });
+
+                let {updateCoord} = this.props;
+                updateCoord(coord, {lat: position.coords.latitude, lng: position.coords.longitude});
+                console.log(store.getState());
             },
             (error) => this.setState({ error: error.message })
         ); 
@@ -33,6 +41,9 @@ export default class Geolocation extends Component {
             latitude: e.nativeEvent.coordinate.latitude,
             longitude: e.nativeEvent.coordinate.longitude
         });
+        let {updateCoord} = this.props;
+        updateCoord(coord, {lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude});
+        console.log(store.getState());
     }
     
     componentDidMount() {
@@ -121,3 +132,17 @@ const styles = StyleSheet.create({
        alignItems: 'center', 
     }
 });
+
+FruitEndWeight.propTypes = {
+    lat: PropTypes.number.isRequired,
+    lng: PropTypes.number.isRequired
+};
+
+function mapStateToProps(state, ownProps) {
+    return {
+        lat: state.coord.lat,
+        lng: state.coord.lng
+    };
+}
+
+export default connect(mapStateToProps, actions)(Geolocation);
