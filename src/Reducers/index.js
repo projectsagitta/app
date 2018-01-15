@@ -1,8 +1,10 @@
 import { combineReducers } from 'redux';
-import CoordReducer from './CoordReducer';
+import LatReducer from './LatReducer';
+import LngReducer from './LngReducer';
 
 const allReducers = {
-    coord: CoordReducer
+    currentLat: LatReducer,
+    currentLng: LngReducer
 }
 
 const rootReducer = combineReducers(allReducers);

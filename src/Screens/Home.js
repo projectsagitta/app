@@ -50,20 +50,6 @@ const styles = StyleSheet.create({
     }
 });
 
-function mapStateToProps (state) {
-    return {
-        appData: state.appData
-    }
-}
 
-function mapDispatchToProps (dispatch) {
-    return {
-        fetchData: () => dispatch(fetchData())
-    }
-}
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Home)
+export default Home;
 

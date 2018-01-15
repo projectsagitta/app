@@ -1,36 +1,39 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import {updateLat, updateLng} from '../Actions/CoordActions';
 import { connect } from 'react-redux';
-import * as actions from '../Actions/CoordActions';
-import {store} from '../Store'
+import store from '../Store';
 
 import { Button, View, Text, StyleSheet } from 'react-native';
 import MapView from 'react-native-maps';
 import Icon from 'react-native-vector-icons/Ionicons';
+
+
 
 class Geolocation extends Component {
     
     constructor(props) {
         super(props);
         this.state = {
-            latitude: this.props.lat,
-            longitude: this.props.lng,
+            lat: this.props.lat,
+            lng: this.props.lng,
             error: null,
         };
+        console.log(this.state);
     }
 
     loadGeolocation() {
         return navigator.geolocation.getCurrentPosition(
             (position) => {
                 this.setState({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
                     error: null,
                 });
-
-                let {updateCoord} = this.props;
-                updateCoord(coord, {lat: position.coords.latitude, lng: position.coords.longitude});
-                console.log(store.getState());
+                this.props.updateLat(position.coords.latitude);
+                this.props.updateLng(position.coords.longitude);
+                    
+                               
             },
             (error) => this.setState({ error: error.message })
         ); 
@@ -38,12 +41,12 @@ class Geolocation extends Component {
     
     updateCoordinates(e) {
         this.setState({
-            latitude: e.nativeEvent.coordinate.latitude,
-            longitude: e.nativeEvent.coordinate.longitude
+            lat: e.nativeEvent.coordinate.latitude,
+            lng: e.nativeEvent.coordinate.longitude
         });
-        let {updateCoord} = this.props;
-        updateCoord(coord, {lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude});
-        console.log(store.getState());
+        this.props.updateLat(e.nativeEvent.coordinate.latitude);
+        this.props.updateLng(e.nativeEvent.coordinate.longitude);        
+        
     }
     
     componentDidMount() {
@@ -51,6 +54,7 @@ class Geolocation extends Component {
     }
 
     render() {
+        console.log(store.getState());
         return (
             <View>        
                 
@@ -58,8 +62,8 @@ class Geolocation extends Component {
                     <MapView                        
                         style={styles.map}
                         region={{
-                            latitude: this.state.latitude,
-                            longitude: this.state.longitude,
+                            latitude: this.state.lat,
+                            longitude: this.state.lng,
                             latitudeDelta: 0.0491,
                             longitudeDelta: 0.0375
                         }}
@@ -67,8 +71,8 @@ class Geolocation extends Component {
                         <MapView.Marker
                             draggable
                             coordinate={{
-                                latitude: this.state.latitude,
-                                longitude: this.state.longitude
+                                latitude: this.state.lat,
+                                longitude: this.state.lng
                             }}
                             pinColor={'#4F8EF7'}
                             onDragEnd={(e) => this.updateCoordinates(e)}
@@ -78,8 +82,8 @@ class Geolocation extends Component {
                 
                 {
                     this.state.latitude ? <View style={styles.textContainer}>
-                        <Text style={styles.textContent}>Latitude: {this.state.latitude}</Text>
-                        <Text style={styles.textContent}>Longitude: {this.state.longitude}</Text>
+                        <Text style={styles.textContent}>Latitude: {this.state.lat}</Text>
+                        <Text style={styles.textContent}>Longitude: {this.state.lng}</Text>
                     </View> : null
                 }
 
@@ -133,16 +137,21 @@ const styles = StyleSheet.create({
     }
 });
 
-FruitEndWeight.propTypes = {
-    lat: PropTypes.number.isRequired,
-    lng: PropTypes.number.isRequired
+Geolocation.propTypes = {
+    lat: PropTypes.any.isRequired,
+    lng: PropTypes.any.isRequired
 };
 
 function mapStateToProps(state, ownProps) {
     return {
-        lat: state.coord.lat,
-        lng: state.coord.lng
+        lat: state.currentLat.lat,
+        lng: state.currentLng.lng
     };
 }
 
-export default connect(mapStateToProps, actions)(Geolocation);
+const mapDispatchToProps = {
+    updateLat,
+    updateLng
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Geolocation);

@@ -1,18 +1,16 @@
 
-import  { UPDATE_COORD }  from '../actions/CoordActions';
+import  { UPDATE_LNG }  from '../Actions/CoordActions';
 
 const initialState = {
-    lat: 0,
-    lng: 0
+    lng: 180
 };
 
 export default function(state=initialState, action) {
     switch (action.type) {
-        case UPDATE_COORD: {
+        case UPDATE_LNG: {
             return {
                 ...state,
-                lat: action.lat,
-                lng: action.lng,
+                lng: action.lng
             }
         }
         default:

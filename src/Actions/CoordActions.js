@@ -1,9 +1,20 @@
-export const UPDATE_COORD = 'UPDATE_COORD';
+export const UPDATE_LAT = 'UPDATE_LAT';
+export const UPDATE_LNG = 'UPDATE_LNG';
 
-export function updateCoord(coord) {
+export function updateLat(lat) {
     return {
-        type: UPDATE_COORD,
-        coord
+        type: UPDATE_LAT,
+        lat 
     }
 }
+
+
+export function updateLng(lng) {
+    return {
+        type: UPDATE_LNG,       
+        lng    
+    }
+}
+
+
 
