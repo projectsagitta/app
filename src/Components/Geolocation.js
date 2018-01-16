@@ -18,8 +18,7 @@ class Geolocation extends Component {
             lat: this.props.lat,
             lng: this.props.lng,
             error: null,
-        };
-        console.log(this.state);
+        };        
     }
 
     loadGeolocation() {
@@ -54,7 +53,6 @@ class Geolocation extends Component {
     }
 
     render() {
-        console.log(store.getState());
         return (
             <View>        
                 

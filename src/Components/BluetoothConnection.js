@@ -10,8 +10,10 @@ import {
 import BluetoothSerial from 'react-native-bluetooth-serial';
 import Toast from '@remobile/react-native-toast';
 import moment from 'moment';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
-export default class BluetoothConnection extends Component {
+class BluetoothConnection extends Component {
     
     constructor (props) {
         super(props);
@@ -22,12 +24,19 @@ export default class BluetoothConnection extends Component {
             unpairedDevices: [],
             connecting: false,
             connected: false,
-            dataFromDevice: []
+            lat: this.props.lat,
+            lng: this.props.lng,
+            dataFromDevice: [],
+            deviceReady: false,
+            deviceOn: false,
+            currentDate: null
         };
         this.enableBluetooth = this.enableBluetooth.bind(this);
         this.startDiscovery = this.startDiscovery.bind(this);
         this.write = this.write.bind(this);
         this.cancelDiscovery = this.cancelDiscovery.bind(this);
+        this.switchDeviceOn = this.switchDeviceOn.bind(this);
+        this.switchDeviceOff = this.switchDeviceOff.bind(this);
     }
     
     componentDidMount() {
@@ -48,11 +57,17 @@ export default class BluetoothConnection extends Component {
             }
             this.setState({ connected: false })
         });
-
+        BluetoothSerial.on('read', (data) => { console.log('without delimiter', data, data.data, typeof data); });
         BluetoothSerial.withDelimiter('\n').then((res)=>{
-            console.log("delimiter setup",res);
+            console.log("delimiter setup", res);
             BluetoothSerial.on('read',(data)=>{
-                console.log('read',data);
+                console.log('read',data, data.data, typeof data);
+                if (typeof data.data === 'string'){
+                    let dataTrimmed =  data.data.replace(/(\r\n|\n|\r)/gm,"");
+                    if (dataTrimmed === 'success'){                        
+                        this.setState({deviceReady: true});
+                    }
+                }                
                 const dataArray = this.state.dataFromDevice;
                 dataArray.push(data.data);
                 this.setState({dataFromDevice: dataArray});
@@ -135,13 +150,16 @@ export default class BluetoothConnection extends Component {
         BluetoothSerial.connect(device.id)
             .then((res) => {
                 Toast.showShortBottom(`Connected to device ${device.name}`);
-                this.setState({ device, connected: true, connecting: false });
-
+                this.setState({ device, connected: true, connecting: false }, () => {
+                    console.log(this.state);
+                });
                 let currentDate = moment().format('DDMMYYYYHHmm');
                 console.log(currentDate);
-                const message = `filename ${currentDate}.csv`;
+                this.setState({currentDate: currentDate});
+                const message = `filename ${currentDate}.csv\r\n`;
                 this.write(message);
-                
+                const coord = `coord ${this.state.lat},${this.state.lng}\r\n`;
+                this.write(coord);                
             })
             .catch((err) => Toast.showShortBottom(err.message))
     }
@@ -160,8 +178,19 @@ export default class BluetoothConnection extends Component {
             })
             .catch((err) => Toast.showShortBottom(err.message))
     }
-    
+    switchDeviceOn = () => {        
+        this.write('mode 1\r\n');
+        this.setState({deviceOn: true});
+    }
+    switchDeviceOff = () => {
+        this.write('mode 0\r\n');
+        this.setState({deviceOn: false}, () => {
+            const message = `get ${this.state.currentDate}.csv\r\n`;
+            this.write(message);
+        });
+    }
     render() {
+        // console.log(this.state);
         return (
             <View style={styles.container}>
                 <ScrollView>
@@ -207,7 +236,7 @@ export default class BluetoothConnection extends Component {
                                                 <Text style={styles.devicesId}>{`<${device.id}>`}</Text>
                                             </View>
                                             {
-                                                this.state.connected ? <Text style={{color: '#00aa00'}}>
+                                                (this.state.device && this.state.device.id === device.id) ? <Text style={{color: '#00aa00'}}>
                                                     Connected
                                                 </Text> : <Button
                                                     title='Connect'
@@ -219,16 +248,25 @@ export default class BluetoothConnection extends Component {
                             ) : null
                         }                    
                     </View>
-                    {/*<View style={{marginRight: 10, marginLeft: 10}}>*/}
-                        {/*{*/}
-                            {/*this.state.connected ? (*/}
-                                {/*<Button*/}
-                                    {/*title='Start'*/}
-                                    {/*onPress={this.write}                                     */}
-                                    {/*/>*/}
-                            {/*) : null*/}
-                        {/*}*/}
-                    {/*</View>*/}
+                    <View style={{marginRight: 10, marginLeft: 10}}>
+                        {
+                            this.state.deviceReady && !this.state.deviceOn ? (                                
+                                <Button
+                                    title='Start'
+                                    onPress={this.switchDeviceOn}                                     
+                                    />
+                            ) : null
+                        }
+                        {
+                            this.state.deviceReady && this.state.deviceOn ? (                                
+                                <Button
+                                    title='Finish'
+                                    onPress={this.switchDeviceOff}                                     
+                                    />
+                            ) : null
+                        }
+                        
+                    </View>
                     <View style={styles.dataList}>
                         {
                             this.state.dataFromDevice.length > 0 && <Text 
@@ -269,6 +307,18 @@ export default class BluetoothConnection extends Component {
         )
         
     }
+}
+
+BluetoothConnection.propTypes = {
+    lat: PropTypes.any.isRequired,
+    lng: PropTypes.any.isRequired
+};
+
+function mapStateToProps(state, ownProps) {
+    return {
+        lat: state.currentLat.lat,
+        lng: state.currentLng.lng
+    };
 }
 
 const styles = StyleSheet.create({
@@ -325,3 +375,5 @@ const styles = StyleSheet.create({
    } 
    
 });
+
+export default connect(mapStateToProps)(BluetoothConnection);
