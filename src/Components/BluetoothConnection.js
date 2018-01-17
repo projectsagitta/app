@@ -62,13 +62,34 @@ class BluetoothConnection extends Component {
             console.log("delimiter setup", res);
             BluetoothSerial.on('read',(data)=>{
                 console.log('read',data, data.data, typeof data);
+                const dataArray = this.state.dataFromDevice;
+                const currentDate = this.state.currentDate;
+                const lat = this.state.lat;
+                const lng = this.state.lng;
                 if (typeof data.data === 'string'){
                     let dataTrimmed =  data.data.replace(/(\r\n|\n|\r)/gm,"");
                     if (dataTrimmed === 'success'){                        
-                        this.setState({deviceReady: true});
+                        this.setState({deviceReady: true}, ()=>{
+                            const coord = `coord ${lat},${lng}\r\n`;
+                            this.write(coord);
+                        });
                     }
-                }                
-                const dataArray = this.state.dataFromDevice;
+                    if (dataTrimmed === 'activated'){
+                        this.setState({deviceOn: true});
+                    }
+                    if (dataTrimmed === 'deactivated'){
+                        this.setState({deviceOn: false}, () => {
+                            const message = `get ${currentDate}.csv\r\n`;
+                            this.write(message);
+                        });
+                    }
+                    if (dataTrimmed === '_start_file'){
+                        dataArray.push('FILE STARTS HERE!');
+                    }
+                    if (dataTrimmed === '_end_file'){
+                        dataArray.push('FILE ENDS HERE!');
+                    }                    
+                } 
                 dataArray.push(data.data);
                 this.setState({dataFromDevice: dataArray});
             })
@@ -158,17 +179,7 @@ class BluetoothConnection extends Component {
                 this.setState({currentDate: currentDate}, () => {
                     const message = `filename ${currentDate}.csv\r\n`;
                     this.write(message);
-                });
-                
-                const deviceObj = this;
-                let lat = this.state.lat;
-                let lng = this.state.lng;
-                setTimeout(function(){
-                    const coord = `coord ${lat},${lng}\r\n`;
-                    deviceObj.write(coord);
-                }, 0);
-                         
-                           
+                });        
             })
             .catch((err) => Toast.showShortBottom(err.message))
     }
@@ -189,14 +200,9 @@ class BluetoothConnection extends Component {
     }
     switchDeviceOn = () => {        
         this.write('mode 1\r\n');
-        this.setState({deviceOn: true});
     }
     switchDeviceOff = () => {
-        this.write('mode 0\r\n');
-        this.setState({deviceOn: false}, () => {
-            const message = `get ${this.state.currentDate}.csv\r\n`;
-            this.write(message);
-        });
+        this.write('mode 0\r\n');        
     }
     render() {
         // console.log(this.state);
@@ -257,25 +263,7 @@ class BluetoothConnection extends Component {
                             ) : null
                         }                    
                     </View>
-                    <View style={{marginRight: 10, marginLeft: 10}}>
-                        {
-                            this.state.deviceReady && !this.state.deviceOn ? (                                
-                                <Button
-                                    title='Start'
-                                    onPress={this.switchDeviceOn}                                     
-                                    />
-                            ) : null
-                        }
-                        {
-                            this.state.deviceReady && this.state.deviceOn ? (                                
-                                <Button
-                                    title='Finish'
-                                    onPress={this.switchDeviceOff}                                     
-                                    />
-                            ) : null
-                        }
-                        
-                    </View>
+                    
                     <View style={styles.dataList}>
                         {
                             this.state.dataFromDevice.length > 0 && <Text 
@@ -308,9 +296,29 @@ class BluetoothConnection extends Component {
                 
                 
                 <View style={styles.buttonBottom} >
-                    <Button
-                        title={'Discover'}
-                        onPress={this.startDiscovery} />
+                    {
+                        !this.state.connected ? (
+                            <Button
+                                title={'Discover'}
+                                onPress={this.startDiscovery} />
+                        ) : null
+                    }  
+                    {
+                        this.state.deviceReady && !this.state.deviceOn ? (
+                            <Button
+                                title='Start'
+                                onPress={this.switchDeviceOn}
+                            />
+                        ) : null
+                    }
+                    {
+                        this.state.deviceReady && this.state.deviceOn ? (
+                            <Button
+                                title='Finish'
+                                onPress={this.switchDeviceOff}
+                            />
+                        ) : null
+                    }                    
                 </View>
             </View>
         )
