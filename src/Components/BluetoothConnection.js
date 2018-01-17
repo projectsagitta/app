@@ -153,13 +153,22 @@ class BluetoothConnection extends Component {
                 this.setState({ device, connected: true, connecting: false }, () => {
                     console.log(this.state);
                 });
-                let currentDate = moment().format('DDMMYYYYHHmm');
+                let currentDate = moment().format('DDMMYYYYHHmm');                
                 console.log(currentDate);
-                this.setState({currentDate: currentDate});
-                const message = `filename ${currentDate}.csv\r\n`;
-                this.write(message);
-                const coord = `coord ${this.state.lat},${this.state.lng}\r\n`;
-                this.write(coord);                
+                this.setState({currentDate: currentDate}, () => {
+                    const message = `filename ${currentDate}.csv\r\n`;
+                    this.write(message);
+                });
+                
+                const deviceObj = this;
+                let lat = this.state.lat;
+                let lng = this.state.lng;
+                setTimeout(function(){
+                    const coord = `coord ${lat},${lng}\r\n`;
+                    deviceObj.write(coord);
+                }, 0);
+                         
+                           
             })
             .catch((err) => Toast.showShortBottom(err.message))
     }
