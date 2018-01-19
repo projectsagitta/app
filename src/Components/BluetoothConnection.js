@@ -184,25 +184,48 @@ class BluetoothConnection extends Component {
             .catch((err) => Toast.showShortBottom(err.message))
     }
     /**
+     * Reconnect to bluetooth device by id
+     * @param  {Object} device
+     */
+    reconnectDevice(device) {
+        this.setState({ connecting: true });
+        BluetoothSerial.connect(device.id)
+            .then((res) => {
+                Toast.showShortBottom(`Connected to device ${device.name}`);
+                this.setState({ device, connected: true, connecting: false }, () => {
+                    console.log(this.state);
+                });                  
+            })
+            .catch((err) => Toast.showShortBottom(err.message))
+    }
+    
+    /**
      * Start measuring
      * @param {String} message
      */
     write(message) {        
         if (!this.state.connected) {
             Toast.showShortBottom('You must connect to device first')
-        }
-        BluetoothSerial.write(message)
-            .then((res) => {
-                Toast.showShortBottom('Successfully wrote to device');
-                this.setState({ connected: true })
-            })
-            .catch((err) => Toast.showShortBottom(err.message))
+        } else {
+            BluetoothSerial.write(message)
+                .then((res) => {
+                    Toast.showShortBottom('Successfully wrote to device');                    
+                })
+                .catch((err) => Toast.showShortBottom(err.message))
+        }        
     }
     switchDeviceOn = () => {        
         this.write('mode 1\r\n');
     }
     switchDeviceOff = () => {
-        this.write('mode 0\r\n');        
+        let device = this;
+        function sendMessage(){            
+            if (device.state.deviceOn){
+                device.write('mode 0\r\n');
+                setTimeout(sendMessage, 1000);
+            }            
+        }        
+        sendMessage();
     }
     render() {
         // console.log(this.state);
@@ -251,9 +274,11 @@ class BluetoothConnection extends Component {
                                                 <Text style={styles.devicesId}>{`<${device.id}>`}</Text>
                                             </View>
                                             {
-                                                (this.state.device && this.state.device.id === device.id) ? <Text style={{color: '#00aa00'}}>
+                                                (this.state.device && this.state.device.id === device.id && this.state.connected) ? <Text style={{color: '#00aa00'}}>
                                                     Connected
-                                                </Text> : <Button
+                                                </Text> : (this.state.device && this.state.device.id === device.id) ? <Button
+                                                    title='Reconnect'
+                                                    onPress={this.reconnectDevice.bind(this, device)} /> : <Button
                                                     title='Connect'
                                                     onPress={this.connectDevice.bind(this, device)} />
                                             }                                        
@@ -297,7 +322,7 @@ class BluetoothConnection extends Component {
                 
                 <View style={styles.buttonBottom} >
                     {
-                        !this.state.connected ? (
+                        !this.state.connected && !this.state.device ? (
                             <Button
                                 title={'Discover'}
                                 onPress={this.startDiscovery} />
