@@ -12,6 +12,7 @@ import Toast from '@remobile/react-native-toast';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import {GoogleSignin, GoogleSigninButton} from 'react-native-google-signin';
 
 class BluetoothConnection extends Component {
     
@@ -29,7 +30,10 @@ class BluetoothConnection extends Component {
             dataFromDevice: [],
             deviceReady: false,
             deviceOn: false,
-            currentDate: null
+            currentDate: null,
+            measureResults: false,
+            signIn: false,
+            user: ''
         };
         this.enableBluetooth = this.enableBluetooth.bind(this);
         this.startDiscovery = this.startDiscovery.bind(this);
@@ -37,9 +41,15 @@ class BluetoothConnection extends Component {
         this.cancelDiscovery = this.cancelDiscovery.bind(this);
         this.switchDeviceOn = this.switchDeviceOn.bind(this);
         this.switchDeviceOff = this.switchDeviceOff.bind(this);
+        this.sendResults = this.sendResults.bind(this);
     }
     
     componentDidMount() {
+        GoogleSignin.configure({
+            webClientId: '382472343452-g7l6cmjppb4eol70c7bdtspihffnm7f9.apps.googleusercontent.com',
+            offlineAccess: false
+        });
+        
         Promise.all([
             BluetoothSerial.isEnabled(),
             BluetoothSerial.list()
@@ -83,14 +93,13 @@ class BluetoothConnection extends Component {
                             this.write(message);
                         });
                     }
-                    if (dataTrimmed === '_start_file'){
-                        dataArray.push('FILE STARTS HERE!');
+                    if (dataTrimmed === '_start_file'){                        
                     }
-                    if (dataTrimmed === '_end_file'){
-                        dataArray.push('FILE ENDS HERE!');
-                    }                    
-                } 
-                dataArray.push(data.data);
+                    if (dataTrimmed === '_end_file'){                        
+                        this.setState({measureResults: true});
+                    }
+                    dataArray.push(dataTrimmed);
+                }                 
                 this.setState({dataFromDevice: dataArray});
             })
         });
@@ -209,7 +218,7 @@ class BluetoothConnection extends Component {
         } else {
             BluetoothSerial.write(message)
                 .then((res) => {
-                    Toast.showShortBottom('Successfully wrote to device');                    
+                    // Toast.showShortBottom('Successfully wrote to device');                    
                 })
                 .catch((err) => Toast.showShortBottom(err.message))
         }        
@@ -226,6 +235,72 @@ class BluetoothConnection extends Component {
             }            
         }        
         sendMessage();
+    }
+    sendResults = () => {
+        this.setState({signIn: true});
+        let startIndex = this.state.dataFromDevice.indexOf('_start_file') + 1;
+        let endIndex = this.state.dataFromDevice.indexOf('_end_file');
+        let results = this.state.dataFromDevice.slice(startIndex, endIndex);
+        let resultsObj = results.map((result) => {            
+            result = result.split(';');
+            let obj = {};
+            obj.milliseconds = parseFloat(result[0]);
+            obj.pressure = parseFloat(result[2]);
+            obj.temperature = parseFloat(result[1]);
+            result = obj;
+            return result;
+        });
+        this.setState({measureResults: resultsObj}, () => {
+            console.log(this.state);
+        });
+    }
+    signIn = () => {
+        GoogleSignin.signIn()
+            .then((user) => {
+                console.log(user);
+                this.setState({user: user}, ()=>{
+                    fetch('https://dev.citizen-ocean.org/rest-auth/google/', {
+                        method: 'post',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({"access_token": this.state.user.accessToken})
+                        
+                    }).then(res=>res.json())
+                    .then(res => {
+                        console.log(res);
+                        let currentDate = this.state.currentDate;
+                        currentDate = moment(this.state.currentDate,'DDMMYYYYHHmm').format('YYYY-MM-DDTHH:mm');
+                        fetch('https://dev.citizen-ocean.org/api/stations/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'Authorization': 'Token ' + res.key
+                            },
+                            body: JSON.stringify({
+                                id_device: 1,
+                                id_station: 1,
+                                time: currentDate,
+                                coord: {
+                                    lon: this.state.lng,
+                                    lat: this.state.lat
+                                },
+                                results: this.state.measureResults
+                            })
+                        }).then(res=>{
+                            console.log(JSON.stringify(res));
+                            return res.json()
+                        })
+                        .then(res => console.log(res))
+                    })
+                });
+            })
+            .catch((err) => {
+                console.log('WRONG SIGNIN', err);
+            })
+            .done();        
     }
     render() {
         // console.log(this.state);
@@ -328,22 +403,44 @@ class BluetoothConnection extends Component {
                                 onPress={this.startDiscovery} />
                         ) : null
                     }  
+                    
+                    
                     {
-                        this.state.deviceReady && !this.state.deviceOn ? (
-                            <Button
-                                title='Start'
-                                onPress={this.switchDeviceOn}
-                            />
-                        ) : null
-                    }
-                    {
-                        this.state.deviceReady && this.state.deviceOn ? (
-                            <Button
-                                title='Finish'
-                                onPress={this.switchDeviceOff}
-                            />
-                        ) : null
-                    }                    
+                        this.state.measureResults ? (
+                            <View>
+                                {
+                                    this.state.signIn ? (
+                                        <GoogleSigninButton
+                                            style={{width: '100%', height: 48}} 
+                                            value="Sign in"
+                                            size={GoogleSigninButton.Size.Icon}
+                                            color={GoogleSigninButton.Color.Dark}
+                                            onPress={this.signIn.bind(this)}/>
+                                    ) : <Button
+                                        title='Send results'
+                                        onPress={this.sendResults}
+                                    />
+                                }
+                            </View>                            
+                        ) : <View>
+                            {
+                                this.state.deviceReady && !this.state.deviceOn ? (
+                                    <Button
+                                        title='Start'
+                                        onPress={this.switchDeviceOn}
+                                    />
+                                ) : null
+                            }
+                            {
+                                this.state.deviceReady && this.state.deviceOn ? (
+                                    <Button
+                                        title='Finish'
+                                        onPress={this.switchDeviceOff}
+                                    />
+                                ) : null
+                            }
+                        </View>                            
+                    }                       
                 </View>
             </View>
         )
