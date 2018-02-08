@@ -1,8 +1,12 @@
 import { combineReducers } from 'redux';
-import appData from './dataReducer';
+import LatReducer from './LatReducer';
+import LngReducer from './LngReducer';
 
-const rootReducer = combineReducers({
-    appData
-});
+const allReducers = {
+    currentLat: LatReducer,
+    currentLng: LngReducer
+}
+
+const rootReducer = combineReducers(allReducers);
 
 export default rootReducer;

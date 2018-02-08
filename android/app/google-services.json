@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "382472343452",
+    "project_id": "firebase-sagitta"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:382472343452:android:7c37a8c956d58a48",
+        "android_client_info": {
+          "package_name": "com.sagitta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "382472343452-qo60v6o7ak2ngq9uqqhu1s74d4qp1g21.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sagitta",
+            "certificate_hash": "85:4E:AD:1C:F8:9E:B8:C2:46:91:12:6A:32:ED:40:74:56:03:EF:7F"
+          }
+        },
+        {
+          "client_id": "382472343452-g7l6cmjppb4eol70c7bdtspihffnm7f9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMg9Y7XSTSQdUZ_iKf6mBDBhPqpNqz05U"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

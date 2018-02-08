@@ -3,8 +3,7 @@ import { Button, View, Text, StyleSheet } from 'react-native';
 import HeaderButton from '../Components/HeaderButton';
 import Geolocation from '../Components/Geolocation';
 
-import { connect } from 'react-redux';
-import { fetchData } from '../Actions/index';
+
 
 class Home extends Component {
     
@@ -13,28 +12,6 @@ class Home extends Component {
         
         return (
             <View style={styles.container}>
-                             
-
-                {/*<Button*/}
-                    {/*onPress={() => this.props.fetchData()}*/}
-                    {/*title="Load Data"*/}
-                {/*/>*/}
-                
-                {/*<View style={styles.mainContent}>*/}
-                    {/*{*/}
-                        {/*this.props.appData.isFetching && <Text>Loading</Text>*/}
-                    {/*}*/}
-                    {/*{*/}
-                        {/*this.props.appData.data.length ? (*/}
-                            {/*this.props.appData.data.map((person, i) => {*/}
-                                {/*return <View key={i} style={styles.mainContentText}>*/}
-                                    {/*<Text>Name: {person.name}</Text>*/}
-                                    {/*<Text>Age: {person.age}</Text>*/}
-                                {/*</View>*/}
-                            {/*})*/}
-                        {/*) : null*/}
-                    {/*}*/}
-                {/*</View>*/}
                 
                 <Geolocation />
                 
@@ -46,8 +23,7 @@ class Home extends Component {
                         title="Go!"
                         onPress={() => navigate('DeviceSearch')}
                     />
-                </View>
-                
+                </View>                
             </View>
         )
     }
@@ -74,20 +50,6 @@ const styles = StyleSheet.create({
     }
 });
 
-function mapStateToProps (state) {
-    return {
-        appData: state.appData
-    }
-}
 
-function mapDispatchToProps (dispatch) {
-    return {
-        fetchData: () => dispatch(fetchData())
-    }
-}
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Home)
+export default Home;
 
